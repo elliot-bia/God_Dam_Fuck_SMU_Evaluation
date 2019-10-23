@@ -1,0 +1,2 @@
+# God_Dam_Fuck_SMU_Evaluation
+SMU教务系统自动评价脚本
