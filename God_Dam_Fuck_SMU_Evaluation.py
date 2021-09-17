@@ -7,10 +7,18 @@
 # #    mail: elliot.bia.8989@outlook.com
 # #    github: https://github.com/elliot-bia
 # #    Date: 2019-10-17 10:53:02
-# #    LastEditors: zzy
-# #    LastEditTime: 2019-10-23 15:31:10
+# #    Editors: zzy
+# #    EditTime: 2019-10-23 15:31:10
+# #    LastEditors: Jayce丶H
+# #    github: https://github.com/Jayce-H
+# #    LastEditTime: 2021-09-17 19:01:31
 # #    ---------------------------------
 # #    Description: 用于SMU每日的课程评价
+# #    2021-09-17 更新内容：
+# #    1.新增筛选当日未评价课程，避免重复post
+# #    2.删除了问题类型3随机选取文本的功能，改为跳过不填
+# #    3.更新了部分参数，原参数已不再适用
+# #    4.随机评分从5星4星更改为4星3星，最高得分从100分更改为80分
 ###
 
 
@@ -167,24 +175,40 @@ class Downloader:
             # 获取今日份日期
             "jsrq": yesterday,
             # "jsrq": "2019-10-16",
+            # "jsrq": "2021-09-17",
             "page": "1",
             "rows": "20",
             "sort": "jcdm2",
-            "order": "asc"
+            "order": "desc"
         }
         # 处理信息
         json_data = self.download(url, down_type=2, is_json=True, data=data)
 
         question_list = {}
         try:
-            print(f"今日份待评价课堂数量{json_data['total']}份")
+            print(data['jsrq'],f"课堂评价总共 {json_data['total']} 份")
             for i in json_data['rows']:
                 temp = {}
-
+                ###
+                if i['pjdm'] == '' :   #筛选未评价的课程
+                    temp['teadm'] = i['teadm']
+                    temp['dgksdm'] = i['dgksdm']
+                    question_list[i['rownum_']] = temp
+                    print(f"第{i['rownum_']}份：",temp)
+                else:
+                    print(f"第{i['rownum_']}份已评价")
+                ###
+            ''' 原来的版本
                 temp['teadm'] = i['teadm']
                 temp['dgksdm'] = i['dgksdm']
                 question_list[i['rownum_']] = temp
+                print(temp)
+                print('temp +1')
+                print()
+            '''
+            #print(question_list)
             return question_list
+
         except Exception as e:
             print('出错: ', e)
             print(json_data)
@@ -197,20 +221,20 @@ class Downloader:
         return 返回值: 返回html文档
         """
 
-        url = 'http://zhjw.smu.edu.cn/new/student/ktpj/showXsktpjwj.page'
+        url = 'http://zhjw.smu.edu.cn/new/student/ktpj/showXsktpjwj.page?'
         
         question_params = {
             'pjlxdm': 6,
             'teadm': info_list['teadm'],
             'dgksdm': info_list['dgksdm'],
-            'wjdm': 10002805,
-            '_': 1571623783331
+            'wjdm': 10003019,
+            '_': 1631806763283
         }
         # print(info_list)
         # print(question_params)
         html_content = self.download(url, params=question_params, down_type=1, is_json=False)
         # html_content.decode()
-        # print(html_content)
+        #print(html_content)
         return html_content.decode('utf-8')
 
     def post_question(self, post_content):
@@ -224,6 +248,7 @@ class Downloader:
         
         self.download(url, down_type=2, data=post_content)
         print("post包发送成功, 请检查!")
+        print('')
         
 
 
@@ -247,6 +272,7 @@ class Html_Parse:
         exception 异常处理:  None \n
         return 返回值:  params的字典
         """
+        #print("get url start!")
         # 找到tag的txt内容
         pattern = re.compile(r"/new/student/ktpj/savePj\'")
         target = soup.find("script", text=pattern).get_text()
@@ -265,10 +291,11 @@ class Html_Parse:
         # 弄成字典后返回
         dit = {}
         for k,v in params_all:
-            # print(k, v)
+            print(k, v)
             dit[k] = v
-            # print(type(v))
+            #print(type(v))
             
+        print("get_url_params done!")
         return dit
 
 
@@ -284,11 +311,11 @@ class Html_Parse:
         probability_num = random.choice(values)
         return_dict = {}
         if probability_num == 20.0:
-            # print("5星评价")
+            print("4星评价")
             zbxmdm_pattern = re.compile(r"\"fzbl\":20.0[\s\S]*zbxmdm\":\"(\d*)\"")
             zbxmdm = zbxmdm_pattern.findall(str(child))
-            fz = 25
-            dtjg = '★★★★★'
+            fz = 20
+            dtjg = '★★★★'
             # 写入字典
             return_dict['zbxmdm'] = zbxmdm[0]
             return_dict['fz'] = fz
@@ -296,11 +323,11 @@ class Html_Parse:
             return return_dict, fz
 
         if probability_num == 40.0:
-            print("4星评价")
+            print("3星评价")
             zbxmdm_pattern = re.compile(r"\"fzbl\":40.0[\s\S]*zbxmdm\":\"(\d*)\"")
             zbxmdm = zbxmdm_pattern.findall(str(child))
-            fz = 20
-            dtjg = '★★★★'
+            fz = 15
+            dtjg = '★★★'
             # 写入字典
             return_dict['zbxmdm'] = zbxmdm[0]
             return_dict['fz'] = fz
@@ -328,6 +355,7 @@ class Html_Parse:
         return_dict['dtjg'] = dtjg
         return return_dict
 
+    '''
     def content_from_txt(self):
         """
         Description 描述:  随机读取txt文本的一行 \n
@@ -352,11 +380,12 @@ class Html_Parse:
         """
         return_dict = {}
         fz = 0
-        dtjg = self.content_from_txt()
+        #dtjg = self.content_from_txt()
+        dtjg = ""
         return_dict['fz'] = fz
         return_dict['dtjg'] = dtjg
         return return_dict
-
+    '''
 
     def get_dt_content(self, soup):
         """
@@ -365,6 +394,7 @@ class Html_Parse:
         exception 异常处理:  None \n
         return 返回值: 分数 和 dt的txdm的等参数的字典
         """
+        #print("get dt start")
         # all_content = soup.find('input', id='thisSchoolIsSMU')
         all_content = soup.find_all('div', class_='question')
         
@@ -388,12 +418,12 @@ class Html_Parse:
             txdm = txdm_pattern.findall(str(child))
             zbdm = zbdm_pattern.findall(str(child))
             zbmc = zbmc_pattern.findall(str(child))
-            # print(txdm[0])
-            # print(type(txdm[0]))
-            # print(int(txdm[0]))
-            # print(type(int(txdm[0])))
-            # print(zbmc)
-            # print(zbdm)
+            print("问题类型 txdm[0]=",txdm[0])
+            #print(type(txdm[0]))
+            #print("int(txdm[0])",int(txdm[0]))
+            #print(type(int(txdm[0])))
+            print("zbmc",zbmc)
+            print("zbdm",zbdm)
             
             single_question_reply_info['txdm'] = int(txdm[0]) # 这里要数字
             single_question_reply_info['zbdm'] = zbdm[0]
@@ -404,20 +434,24 @@ class Html_Parse:
             # 进行分流, 如果匹配了, 说明是一种类型
             if txdm[0] == '5':
                 diff_content5, score_temp = self.distinguish_question_type5(child)
-                # print(score_temp)
+                #print("score_temp",score_temp)
                 score = score_temp + score
                 single_question_reply_info.update(diff_content5)
             elif txdm[0] == '1':
                 diff_content1 = self.distinguish_question_type1(child)
                 single_question_reply_info.update(diff_content1)
-            elif txdm[0] == '3':
-                diff_content3 = self.distinguish_question_type3(child)
-                single_question_reply_info.update(diff_content3)
+            elif txdm[0] == '3':  # skip
+                print("不填跳过 skip")
+                #diff_content3 = self.distinguish_question_type3(child)
+                #single_question_reply_info.update(diff_content3)
             else:
+                print("else")
                 print("正则匹配出错, 请检查以下内容: ", child)
             all_question_reply_info.append(single_question_reply_info)
+        print("得分 score:",score)
+        # print("")
         # print(all_question_reply_info)
-        # print(score)
+        print("get_dt_content done!")
         return score, json.dumps(all_question_reply_info)
             
 
@@ -435,8 +469,8 @@ class Html_Parse:
         score, dt_list = self.get_dt_content(soup)
         post_data['wtpf'] = score
         post_data['dt'] = dt_list
-        print("解析结果".center(20, '-'))
-        print(post_data)
+        # print("解析结果".center(30, '-'))
+        # print(post_data)
         # print(post_data)
         return post_data
         
@@ -522,20 +556,23 @@ def main():
     # 下载今日份的问卷
     if isinstance(question_list, dict):  # 使用isinstance检测数据类型
         # 遍历字典
-        for x in range(len(question_list)):
-            temp_key = list(question_list.keys())[x]
-            temp_value = question_list[temp_key]
-            # print(temp_key, temp_value)
-            # 获取了内容
-            print("-" * 50)
-            html_content = Download_Class.get_html_question(temp_value)
-            # print(html_content)
-            print("现在获取html内容")
+        if len(question_list)==0:
+            print("当日剩余 0 份未评价")
+        else:
+            for x in range(len(question_list)):
+                temp_key = list(question_list.keys())[x]
+                temp_value = question_list[temp_key]
+                print(temp_key, temp_value)
+                # 获取了内容
+                print("-" * 50)
+                html_content = Download_Class.get_html_question(temp_value)
+                # print(html_content)
+                print("现在获取html内容")
             
-            post_data = html_parse_class.html_pares_index(html_content)
-            print("post包解析完成")
-            response = Download_Class.post_question(post_data)
-            # print(response.request.body)
+                post_data = html_parse_class.html_pares_index(html_content)
+                print("post包解析完成")
+                response = Download_Class.post_question(post_data)
+                # print(response.request.body)
     print('-'*50)
     print("程序执行完成, 请检查结果!")
     print('-'*50)
@@ -544,6 +581,11 @@ def main():
     print("              如需反馈bug请提交issue")
     print("All Rights Reserved".center(50))
     print(" CopyRight: z ".center(50, '#'))
+    print('-'*50)
+    print(" Update ".center(50,'#'))
+    print("Jayce丶H".center(50))
+    print("2021.09.17".center(50))
+    print(" Update Done!".center(50,'#'))
     print('-'*50)
     print("30秒后会自动关闭此窗口")
     print('-'*50)
