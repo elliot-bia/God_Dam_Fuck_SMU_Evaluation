@@ -47,7 +47,7 @@
 ## 2021.09.22
 收到 [Jayce-H](https://github.com/Jayce-H) 的merge请求, 简单看了一下,没啥问题, 我已经毕业了,这个也无法验证, 感谢热心的学弟(学妹)  
 更新内容[在这](https://github.com/elliot-bia/God_Dam_Fuck_SMU_Evaluation/commit/ad1f477132e9cdd34083a262707c91bd774fafac)  
-__2021-09.17更新内容：__
+__2021-09.17更新内容：__  
 1.新增筛选当日未评价课程，避免重复post  
 2.删除了问题类型3随机选取文本的功能，改为跳过不填  
 3.更新了部分参数，原参数已不再适用  
