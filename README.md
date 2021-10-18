@@ -49,9 +49,18 @@ Safari浏览器-偏好设置-高级-在菜单栏中显示“开发”菜单
 开发-允许远程自动化
 
 # 更新
-## 2021.10.18
+## 2021.10.19
 收到 [Jayce-H](https://github.com/Jayce-H) 的merge请求, 简单看了一下,没啥问题, 我已经毕业了,这个也无法验证, 感谢热心的学弟(学妹)  
 更新内容[在这](https://github.com/elliot-bia/God_Dam_Fuck_SMU_Evaluation/commit/ad1f477132e9cdd34083a262707c91bd774fafac)  
+
+__2021-10.19更新内容：__   
+1、可自定义百度OCR相关设置APP_ID API_KEY SECRET_KEY  
+默认识别模式为：高精度文字识别模式，不可更改！  
+需手动在配置文件中添加[AipOcr]项，如下：  
+[AipOcr]  
+APP_ID=  
+API_KEY=  
+SECRET_KEY=
 
 __2021-10.18更新内容：__   
 1.适配Mac，修复无法读取location的bug  
