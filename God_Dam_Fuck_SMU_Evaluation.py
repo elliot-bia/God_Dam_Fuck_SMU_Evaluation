@@ -11,10 +11,19 @@
 # #    EditTime: 2019-10-23 15:31:10
 # #    LastEditors: Jayce丶H
 # #    github: https://github.com/Jayce-H
-# #    LastEditTime: 2021-10-18 20:55:25
+# #    LastEditTime: 2021-10-19 00:22:15
 # #    Description: 用于SMU每日的课程评价
 # #    ---------------------------------
 # #    更新日志：
+# #    2021-10-19:
+# #    1、可自定义百度OCR相关设置APP_ID API_KEY SECRET_KEY
+# #    默认识别模式为：高精度文字识别模式，不可更改！
+# #    需手动在配置文件中添加[AipOcr]项，如下：
+# #    [AipOcr]
+# #    APP_ID=
+# #    API_KEY=
+# #    SECRET_KEY=
+# #    ---------------------------------
 # #    2021-10-18:
 # #    1、适配Mac，修复无法读取location的bug
 # #    已知问题：mac可能会出现无法crop图片的错误，待完善
@@ -54,6 +63,7 @@
 
 
 import sys
+import aip
 import requests
 import json
 import re
@@ -111,6 +121,7 @@ global indexnum
 indexnum = -1
 global values
 values = []
+bdocr = 0
 if (os.path.exists('config.ini')):
     # 打开并读取配置文件
     ini.read("config.ini")
@@ -120,6 +131,14 @@ if (os.path.exists('config.ini')):
     custom = int(ini.get('Settings','Custom'))
     dpi = int(ini.get('Settings','DPI'))
     customnum = ini.get("Custom",'Num')             # 获取自定义评价所有情况的数量
+    # 检测是否自定义OCR
+    try:
+        APPID = ini.get('AipOcr','APP_ID')
+        APPIKEY = ini.get('AipOcr','API_KEY')
+        SECRETKEY = ini.get('AipOcr','SECRET_KEY')
+        bdocr = 1
+    except:
+        bdocr = 0
     if account == '':
         auto = False
         waittime = 30
@@ -293,6 +312,7 @@ class Downloader:
                 print('temp +1')
                 print()
             '''
+            print('')
             return question_list
 
         except Exception as e:
@@ -403,7 +423,7 @@ class Html_Parse:
             if custom == 1:   # 如果配置文件custom开关打开
                 # 获取自定义评分 第randnum行的第child个评分 一份问卷多个问题randnum值不变
                 probability_num = values[indexnum]
-                print("pribability_num:" + str(probability_num))
+                print("自定义：pribability_num:" + str(probability_num))
             else:
                 values = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3]
                 probability_num = random.choice(values)
@@ -573,8 +593,9 @@ class Html_Parse:
 
             # 进行分流, 如果匹配了, 说明是一种类型
             if txdm[0] == '5':
-                indexnum += 1
-                print("选取randnum第 " + str(randnum) + " 项" + str(values) + "的第 "+str(indexnum) + " 个indexnum评价分数")
+                if custom == 1:
+                    indexnum += 1
+                    print("自定义：选取randnum第 " + str(randnum) + " 项" + str(values) + "的第 "+str(indexnum + 1) + " 个indexnum评价分数")
                 diff_content5, score_temp = self.distinguish_question_type5(child)
                 #print("score_temp",score_temp)
                 score = score_temp + score
@@ -683,7 +704,7 @@ class isEleExist():
             driver.find_element(By.ID,element)
             print("id元素： " + str(element) + " 存在")
             return True
-        except Exception as e:
+        except:
             print("未检测到id元素： " + str(element))
             return False
     def classname(element):
@@ -692,7 +713,7 @@ class isEleExist():
             driver.find_element(By.CLASS_NAME,element)
             print("class_name元素： " + str(element) + " 存在")
             return True
-        except Exception as e:
+        except:
             print("未检测到class_name元素： " + str(element))
             return False
 
@@ -768,7 +789,11 @@ def ocr():
     APP_ID = '25006301'
     API_KEY = 'dW4FImxGiaVAnDaFaOpavKFk'
     SECRET_KEY = 'bgw0vp2xePn5IrWEG9Zs5yCG53OwFFdm'
-    client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+    if bdocr == 1:
+        client = AipOcr(APPID, APPIKEY, SECRETKEY)
+        print("更改AipOcr APP_ID:" + str(APPID) + "，程序默认APP_ID为:" + str(APP_ID))
+    else:
+        client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
     # url = 'http://zhjw.smu.edu.cn/yzm'
     i = open(path2,'rb')
     img = i.read()
@@ -861,7 +886,8 @@ def main():
             print("未正确安装Chrome Driver")
             print(e)
             sys.exit()
-
+    if bdocr == 1:
+        print("已启用自定义AipOcr参数...")
     # 获得JSESSIONID
     JSESSIONID = login_get_cookies()
     if JSESSIONID == '':
@@ -885,11 +911,12 @@ def main():
                 print("当日剩余 0 份未评价")
             else:
                 for x in range(len(question_list)): 
+                    print("-" * 50)
                     if custom == 1:
                         randnum = random.randrange(1,int(customnum) + 1)     # 随机从1-num里面选一种情况
                         print("自定义：选取第 " + str(randnum) + " 项 randnum")
                         indexnum = -1    # 初始化评价选取序号 
-                        print("自定义：初始化评价选取 值values:[] 和 序号indexnum:-1")
+                        print("自定义：初始化评价选取 值values:[ ] 和 序号indexnum:-1")
                         values = []
                         valuenum = ini.get("Custom",str(randnum)) # 获取该情况的value值
                         for i in range(0,4):
@@ -897,9 +924,8 @@ def main():
                         print("自定义：获取第 " + str(randnum) +" 项的值values:" + str(values))
                     temp_key = list(question_list.keys())[x]
                     temp_value = question_list[temp_key]
-                    print(temp_key, temp_value)
+                    print(str(temp_key) + '： ' + str(temp_value))
                     # 获取了内容
-                    print("-" * 50)
                     html_content = Download_Class.get_html_question(temp_value)
                     # print(html_content)
                     print("现在获取html内容")
@@ -922,7 +948,7 @@ def main():
     print("github: https://github.com/elliot-bia")
     print("Editors: Jayce丶H".center(50))
     print("github: https://github.com/Jayce-H")
-    print("Version3.5 2021.10.18".center(50))
+    print("Version3.5.2 2021.10.19".center(50))
     print('-'*50)
     if logout == 1:
         print("日志已写入文件a.log中")
