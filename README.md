@@ -34,15 +34,6 @@
 
 懒咯, 升级计划待定
 
-
-
-
-# 非常感谢前辈 @Aster-the-Med-Stu
-代码参考 [Aster-the-Med-Stu](https://github.com/Aster-the-Med-Stu) 前辈的 [Fuck-SMU-Evaluation项目](https://github.com/Aster-the-Med-Stu/Fuck-SMU-Evaluation)  
-由于系统有所升级, 所以进行调试优化  
-大部分代码重构重写
-
-
 # 使用说明  
 不会编译 不想编译 编译出错 缺少编译插件，可以使用已编译好的现成文件  
 - Windows需要安装Edge driver拓展，可在Edge官网下载对应版本拓展  
@@ -110,3 +101,11 @@ Windows为Edge，Mac为Safari，Linux为Chrome
 2.删除了问题类型3随机选取文本的功能，改为跳过不填  
 3.更新了部分参数，原参数已不再适用  
 4.随机评分从5星4星更改为4星3星，最高得分从100分更改为80分 
+
+
+
+
+# 非常感谢前辈 @Aster-the-Med-Stu
+代码参考 [Aster-the-Med-Stu](https://github.com/Aster-the-Med-Stu) 前辈的 [Fuck-SMU-Evaluation项目](https://github.com/Aster-the-Med-Stu/Fuck-SMU-Evaluation)  
+由于系统有所升级, 所以进行调试优化  
+大部分代码重构重写
