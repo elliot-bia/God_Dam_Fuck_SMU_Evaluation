@@ -11,49 +11,69 @@
 # #    EditTime: 2019-10-23 15:31:10
 # #    LastEditors: Jayce丶H
 # #    github: https://github.com/Jayce-H
-# #    LastEditTime: 2021-10-19 00:22:15
+# #    LastEditTime: 2021-11-28 12:39:44
 # #    Description: 用于SMU每日的课程评价
 # #    ---------------------------------
 # #    更新日志：
-# #    2021-10-19:
-# #    1、可自定义百度OCR相关设置APP_ID API_KEY SECRET_KEY
-# #    默认识别模式为：高精度文字识别模式，不可更改！
-# #    需手动在配置文件中添加[AipOcr]项，如下：
-# #    [AipOcr]
-# #    APP_ID=
-# #    API_KEY=
-# #    SECRET_KEY=
+# #    V3.5.4：
+# #    2021-11-28
+# #    更新登录页面判定机制，减少不必要的等待时间
+# #     通过判定当前页面url，登录后页面跳转既完成判定
+# #     登陆成功后url会跳转为http://zhjw.smu.edu.cn/login!welcome.action
+# #     不为原来的http://zhjw.smu.edu.cn/
 # #    ---------------------------------
-# #    2021-10-18:
-# #    1、适配Mac，修复无法读取location的bug
-# #    已知问题：mac可能会出现无法crop图片的错误，待完善
+# #    V3.5.3：
+# #    2021-11-01
+# #    优化日志输出：评价完成后再次获取当日评价目录，用于日志输出检查是否还有未评价课程
 # #    ---------------------------------
-# #    2021-10-17：
+# #    V3.5.2：
+# #    2021-10-19
+# #    可自定义百度OCR相关设置APP_ID API_KEY SECRET_KEY
+# #     默认识别模式为：高精度文字识别模式，不可更改！
+# #     需手动在配置文件中添加[AipOcr]项，如下：
+# #     [AipOcr]
+# #     APP_ID=
+# #     API_KEY=
+# #     SECRET_KEY=
+# #    ---------------------------------
+# #    V3.5：
+# #    2021-10-18
+# #    适配Mac，修复无法读取location的bug
+# #     已知问题：mac可能会出现无法crop图片的错误，待完善
+# #    ---------------------------------
+# #    V3.4：
+# #    2021-10-17
+# #    新增自定义评价分数
+# #     可通过修改配置文件自定义想评价的分数
+# #    ---------------------------------
+# #    V3.3：
+# #    2021-10-17
 # #    1、新增日志输出开关
-# #    2、新增自定义评价分数
-# #    可通过修改配置文件自定义想评价的分数
-# #    3、基础代码变更
-# #    Mac上无法使用以下命令
-# #    driver.find_element_by_id(element)
-# #    driver.find_element_by_class_name(element)
-# #    全部替换为:
-# #    driver.find_element(By.ID,element)
-# #    driver.find_element(By.CLASS_NAME,element)
-# #    4、由于win系统DPI缩放问题，导致截取验证码失败
-# #    配置文件添加DPI项，保证验证码截图正确
+# #    2、基础代码变更
+# #     Mac上无法使用以下命令
+# #     driver.find_element_by_id(element)
+# #     driver.find_element_by_class_name(element)
+# #     全部替换为:
+# #     driver.find_element(By.ID,element)
+# #     driver.find_element(By.CLASS_NAME,element)
+# #    3、由于win系统DPI缩放问题，导致截取验证码失败
+# #     配置文件添加DPI项，保证验证码截图正确
 # #    ---------------------------------
-# #    2021-10-15：
+# #    V3.2：
+# #    2021-10-15
 # #    1、输出日志每行开头添加时间戳
-# #    代码中所有 print(a,b)格式 调整为 print(str(a) + str(b))格式
+# #     代码中所有 print(a,b)格式 调整为 print(str(a) + str(b))格式
 # #    2、判断操作系统决定浏览器
-# #    Windows为Edge，Mac为Safari，Linux为Chrome
+# #     Windows为Edge，Mac为Safari，Linux为Chrome
 # #    3、添加验证码OCR识别并填入，采用百度免费OCR
-# #    识别错误会自动重新识别填入，直至正确为止
+# #     识别错误会自动重新识别填入，直至正确为止
 # #    ---------------------------------
-# #    2021-10-06：
-# #    1、读取本地配置，自动填入学号密码，缩短等待时间
+# #    V3.1：
+# #    2021-10-06
+# #    读取本地配置，自动填入学号密码，缩短等待时间
 # #    ---------------------------------
-# #    2021-09-17：
+# #    V3.0：
+# #    2021-09-17
 # #    1.新增筛选当日未评价课程，避免重复post
 # #    2.删除了问题类型3随机选取文本的功能，改为跳过不填
 # #    3.更新了部分参数，原参数已不再适用
@@ -676,8 +696,10 @@ def login_get_cookies():
 
     # OCR识别验证码 并且登录 判断验证码是否正确 错误则递归循环OCR识别
     # layui-layer2 4 6为验证码错误时的弹窗id
-    checkocr('layui-layer',2)
+    #checkocr('layui-layer',2)
+    checkocr() #2021.11.28更新登陆成功判定，不再需要layui-layer2元素了
 
+    '''
     # 显性等待 等待登陆成功
     try:
         # 等待登录页面特定元件消失，判断是否登录成功
@@ -686,15 +708,17 @@ def login_get_cookies():
     except  Exception as e:
         print('登录超时！未在指定时间内完成登录！')
         print(e)
-        sys.exit()      
+        sys.exit()    
     else:
-        cookies = driver.get_cookies()
-        # print(cookies)
-        # 关闭窗口
-        driver.quit()
-        # 这里返回值为[{'domain': 'zhjw.smu.edu.cn', 'httpOnly': True, 'name': 'JSESSIONID', 'path': '/', 'secure': False, 'value': '2B583913425880224DD86D176C95D294'}]
-        # 只取value 的值
-        return cookies[0]['value']
+    '''
+    cookies = driver.get_cookies()
+    # print(cookies)
+    # 关闭窗口 进程
+    driver.close()
+    driver.quit()
+    # 这里返回值为[{'domain': 'zhjw.smu.edu.cn', 'httpOnly': True, 'name': 'JSESSIONID', 'path': '/', 'secure': False, 'value': '2B583913425880224DD86D176C95D294'}]
+    # 只取value 的值
+    return cookies[0]['value']
 
 # 判断元素是否存在
 class isEleExist():
@@ -718,24 +742,35 @@ class isEleExist():
             return False
 
 # OCR识别验证码 并且登录 判断验证码是否正确 错误则递归循环OCR识别
-def checkocr(ele,layer):
+#def checkocr(ele,layer):
+def checkocr():
     global driver
     ocr()
     time.sleep(1)
     if auto:
-        if isEleExist.idn(ele + str(layer)):
+        #if isEleExist.idn(ele + str(layer)):
+        #登陆成功后url会跳转为http://zhjw.smu.edu.cn/login!welcome.action
+        if driver.current_url == "http://zhjw.smu.edu.cn/":
             print("验证码错误，正在重试...")
-            layer += 2
+            #layer += 2
             # 点击确定
             # elem_err = driver.find_element_by_class_name("layui-layer-btn0")
             elem_err = driver.find_element(By.CLASS_NAME,"layui-layer-btn0")
             elem_err.click()
-            checkocr(ele,layer)
+            #checkocr(ele,layer)
+            checkocr()
         else:
-            print("验证码正确")
+            print("验证码正确，登录成功！")
     else:
         print("无法读取配置信息，自动填入登录停止")
         print("请在 " + str(waittime) + " 秒内完成手动登录")
+        time.sleep(waittime)
+        if driver.current_url == "http://zhjw.smu.edu.cn/":
+            print('登录超时！未在指定时间内完成登录！')
+            sys.exit()
+        else:
+            print("登录成功！")
+
 
 # 验证码识别
 def ocr():
@@ -936,6 +971,8 @@ def main():
                     # print(response.request.body)
                 print('-'*50)
                 print("程序执行完成, 请检查结果!")
+                # 再次获取评价目录，用于日志输出检查是否还有未评价课程
+                Download_Class.deal_num_evaluations()
     print('-'*50)
     print(" CopyRight: z ".center(30, '#'))
     print("            南医大计协本部程设组组长 z")
@@ -948,7 +985,7 @@ def main():
     print("github: https://github.com/elliot-bia")
     print("Editors: Jayce丶H".center(50))
     print("github: https://github.com/Jayce-H")
-    print("Version3.5.2 2021.10.19".center(50))
+    print("Version3.5.4 2021.11.28".center(50))
     print('-'*50)
     if logout == 1:
         print("日志已写入文件a.log中")
