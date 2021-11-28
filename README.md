@@ -44,6 +44,9 @@
 
 
 # 使用说明
+不会编译 不想编译 编译出错 缺少编译插件，可以使用已编译好的现成文件
+Windows需要安装Edge driver拓展，可在Edge官网下载对应版本拓展 https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
+将其解压放在编译文件同目录下即可
 Mac需打开Safari的开发者选项：  
 Safari浏览器-偏好设置-高级-在菜单栏中显示“开发”菜单  
 开发-允许远程自动化
