@@ -49,7 +49,7 @@ Safari浏览器-偏好设置-高级-在菜单栏中显示“开发”菜单
 开发-允许远程自动化
 
 # 更新
-## 2021.10.19
+2021.10.19
 收到 [Jayce-H](https://github.com/Jayce-H) 的merge请求, 简单看了一下,没啥问题, 我已经毕业了,这个也无法验证, 感谢热心的学弟  
 更新内容[在这](https://github.com/Jayce-H/God_Dam_Fuck_SMU_Evaluation/commit/eaa36afa71789c1a2429124f7627840e15e92ec4)  
 
