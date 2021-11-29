@@ -5,8 +5,8 @@
  * @mail: elliot.bia.8989@outlook.com
  * @github: https://github.com/elliot-bia
  * @Date: 2019-10-17 10:55:22
- * @LastEditors: zzy
- * @LastEditTime: 2019-10-23 16:28:59
+ * @LastEditors: Jayce丶H
+ * @LastEditTime: 2021-11-29 23:22:25
  -->
 # 00 God Dam Fuck SMU Evaluation
 随堂评价居然需要每日评价  
@@ -19,12 +19,13 @@
 为了3分的成绩, 我是如此的不务正业
 
 # 01 支持特性:  
-- 1/3的概率出现95分评价, 躲避教务系统追踪, 1/9概率出现90分评价
+- 评分自定义, 躲避教务系统追踪,可在配置文件中修改
 - 自定义主观题评价内容, 随机抽取, 同上是为了躲避系统追踪
+- 自动登录，验证码自动识别，需在配置文件中添加账号和密码
+- 支持更改验证码识别api的id及密钥，防止公用账号识别达到每日上限后无法使用
 - 打包exe文件, 去除python环境依赖
 
 # 02 后续升级计划:  
-- 深度学习验证码自动识别, 跳过登录操作
 - 升级为数据库存储, 支持多人
 - 自动化多人操作
 - 增加cookie存活检测, 若失效自动登录
@@ -44,7 +45,7 @@
 
 
 # 使用说明  
-不会编译 不想编译 编译出错 缺少编译插件，可以使用已编译好的现成文件  
+不会编译 不想编译 编译出错 缺少编译插件，可以使用编译完成的现成文件  
 - Windows需要安装Edge driver拓展，可在Edge官网下载对应版本拓展  
 https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/  
 将其解压放在编译文件同目录下即可  
